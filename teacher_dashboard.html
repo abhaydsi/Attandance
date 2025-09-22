@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Teacher Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f6fb;padding:20px;}
+.container{max-width:1000px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+h2{color:#0369a1;}
+.filters{margin-bottom:15px;}
+input,select,button{padding:5px;margin-right:10px;}
+table{border-collapse:collapse;width:100%;margin-top:20px;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;}
+th{background:#0369a1;color:white;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Teacher Dashboard (Demo) - Class A</h2>
+
+<div class="filters">
+  Filter: 
+  <input type="date" id="filterDate">
+  <select id="filterMonth">
+    <option value="">Month</option>
+    <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+    <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+    <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+    <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+  </select>
+  <input type="number" id="filterYear" placeholder="Year" min="2000" max="2099">
+  <button onclick="applyFilter()">Apply</button>
+</div>
+
+<table id="attendanceTable">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+// Demo teacher class data
+const teacherClass = 'Class A';
+const classAttendance = [
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'},
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Midday', status:'Absent'},
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Exit', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Midday', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Exit', status:'Present'},
+  {student:'STU001', class:'Class A', date:'2025-09-23', type:'Morning', status:'Absent'},
+  {student:'STU001', class:'Class A', date:'2025-09-23', type:'Midday', status:'Present'},
+  {student:'STU001', class:'Class A', date:'2025-09-23', type:'Exit', status:'Present'},
+];
+
+// Render table function
+function renderTable(data){
+  const tbody=document.querySelector('#attendanceTable tbody');
+  tbody.innerHTML='';
+  data.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${d.student}</td><td>${d.date}</td><td>${d.type}</td><td>${d.status}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// Apply filter
+function applyFilter(){
+  let filtered = classAttendance.filter(d=>d.class===teacherClass);
+  const date=document.getElementById('filterDate').value;
+  const month=document.getElementById('filterMonth').value;
+  const year=document.getElementById('filterYear').value;
+
+  if(date) filtered = filtered.filter(d=>d.date===date);
+  if(month) filtered = filtered.filter(d=>d.date.split('-')[1]===month);
+  if(year) filtered = filtered.filter(d=>d.date.split('-')[0]===year);
+
+  renderTable(filtered);
+}
+
+// Initial render
+renderTable(classAttendance);
+</script>
+</body>
+</html>

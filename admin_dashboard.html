@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f6fb;padding:20px;}
+.container{max-width:1200px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+h2,h3{color:#0369a1;}
+input,select,button{padding:5px;margin-right:10px;margin-bottom:10px;}
+table{border-collapse:collapse;width:100%;margin-top:20px;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;}
+th{background:#0369a1;color:white;}
+button.action-btn{padding:3px 6px;margin:0 2px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>School Admin Dashboard</h2>
+
+<h3>Add New Student</h3>
+<input type="text" id="newStudent" placeholder="Student Name">
+<input type="text" id="newClass" placeholder="Class">
+<button onclick="addStudent()">Add Student</button>
+
+<h3>All Students Attendance</h3>
+Filter: 
+<input type="date" id="filterDate">
+<select id="filterMonth">
+  <option value="">Month</option>
+  <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+  <option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option>
+  <option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option>
+  <option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option>
+</select>
+<input type="number" id="filterYear" placeholder="Year" min="2000" max="2099">
+<button onclick="applyFilter()">Apply</button>
+
+<table id="attendanceTable">
+  <thead>
+    <tr>
+      <th>Student</th>
+      <th>Class</th>
+      <th>Date</th>
+      <th>Type</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+// Demo students & attendance data
+let students = [
+  {name:'STU001', class:'Class A'},
+  {name:'STU002', class:'Class A'}
+];
+
+let attendance = [
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'},
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Midday', status:'Absent'},
+  {student:'STU001', class:'Class A', date:'2025-09-22', type:'Exit', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Midday', status:'Present'},
+  {student:'STU002', class:'Class A', date:'2025-09-22', type:'Exit', status:'Present'}
+];
+
+// Render table function
+function renderTable(data){
+  const tbody = document.querySelector('#attendanceTable tbody');
+  tbody.innerHTML = '';
+  data.forEach((d,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${d.student}</td>
+      <td>${d.class}</td>
+      <td>${d.date}</td>
+      <td>${d.type}</td>
+      <td>${d.status}</td>
+      <td>
+        <button class="action-btn" onclick="markPresent(${i})">Mark Present</button>
+        <button class="action-btn" onclick="markAbsent(${i})">Mark Absent</button>
+        <button class="action-btn" onclick="removeAttendance(${i})">Remove</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+// Filter function
+function applyFilter(){
+  let filtered = attendance;
+  const date = document.getElementById('filterDate').value;
+  const month = document.getElementById('filterMonth').value;
+  const year = document.getElementById('filterYear').value;
+
+  if(date) filtered = filtered.filter(d=>d.date===date);
+  if(month) filtered = filtered.filter(d=>d.date.split('-')[1]===month);
+  if(year) filtered = filtered.filter(d=>d.date.split('-')[0]===year);
+
+  renderTable(filtered);
+}
+
+// Add new student
+function addStudent(){
+  const name = document.getElementById('newStudent').value.trim();
+  const cls = document.getElementById('newClass').value.trim();
+  if(!name || !cls){ alert('Enter name and class'); return; }
+
+  students.push({name, class:cls});
+  const today = new Date().toISOString().split('T')[0];
+  // Add initial attendance for today
+  ['Morning','Midday','Exit'].forEach(type=>{
+    attendance.push({student:name,class:cls,date:today,type,status:'Absent'});
+  });
+  alert('Student added with initial attendance!');
+  applyFilter();
+}
+
+// Attendance actions
+function markPresent(index){ attendance[index].status='Present'; applyFilter(); }
+function markAbsent(index){ attendance[index].status='Absent'; applyFilter(); }
+function removeAttendance(index){ attendance.splice(index,1); applyFilter(); }
+
+// Initial render
+renderTable(attendance);
+</script>
+</body>
+</html>

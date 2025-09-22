@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - School Attendance System</title>
+<style>
+body {font-family: Arial,sans-serif; display:flex; justify-content:center; align-items:center; min-height:100vh; background:#f3f6fb;}
+.login-container {background:white; padding:30px; border-radius:10px; box-shadow:0 5px 20px rgba(0,0,0,0.1); width:380px;}
+h2 {color:#0369a1; margin-bottom:20px;}
+.form-group {margin-bottom:15px;}
+label {display:block; margin-bottom:5px; font-size:14px; color:#555;}
+input, select {width:100%; padding:10px; border-radius:5px; border:1px solid #ccc; font-size:14px;}
+button {width:100%; padding:12px; border:none; border-radius:5px; background:#0369a1; color:white; font-weight:bold; cursor:pointer;}
+.toggle-password {cursor:pointer; margin-left:5px;}
+.error-message {color:red; min-height:18px; margin-bottom:10px;}
+#getCodeBtn {background:#0f766e; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer; width:100%;}
+</style>
+</head>
+<body>
+
+<div class="login-container">
+  <h2>Login</h2>
+  <div id="errorMessage" class="error-message"></div>
+
+  <div class="form-group">
+    <label for="userRole">Select Role</label>
+    <select id="userRole">
+      <option value="">Choose your role</option>
+      <option value="admin">Administrator</option>
+      <option value="superadmin">Super Admin</option>
+      <option value="teacher">Teacher</option>
+      <option value="student">Student</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="username">Username / ID</label>
+    <input type="text" id="username" placeholder="Enter your username">
+  </div>
+
+  <div class="form-group">
+    <label for="password">Password</label>
+    <div style="display:flex;">
+      <input type="password" id="password" placeholder="Enter your password">
+      <button type="button" class="toggle-password" id="togglePass">👁️</button>
+    </div>
+  </div>
+
+  <div class="form-group" id="getCodeGroup" style="display:none;">
+    <button type="button" id="getCodeBtn">Get Authenticator Code</button>
+  </div>
+
+  <div class="form-group" id="authGroup" style="display:none;">
+    <label for="authCode">Authenticator Code (16 characters)</label>
+    <input type="password" id="authCode" placeholder="Enter 16-character code">
+  </div>
+
+  <button type="button" id="loginBtn">Login</button>
+</div>
+
+<script>
+// Demo credentials
+const DEMO = {
+  admin: {username:'admin', password:'admin123', authCode:'ADMINDEMO1234567'},
+  superadmin: {username:'superadmin', password:'super123', authCode:'SUPERADMINDEMO12'},
+  teacher: {username:'teacher1', password:'teacher123', class:'Class A'},
+  student: {username:'STU001', password:'student123', class:'Class A'}
+};
+
+// Elements
+const userRoleEl = document.getElementById('userRole');
+const usernameEl = document.getElementById('username');
+const passwordEl = document.getElementById('password');
+const authCodeEl = document.getElementById('authCode');
+const errorMessage = document.getElementById('errorMessage');
+const getCodeGroup = document.getElementById('getCodeGroup');
+const getCodeBtn = document.getElementById('getCodeBtn');
+const authGroup = document.getElementById('authGroup');
+const loginBtn = document.getElementById('loginBtn');
+const togglePassBtn = document.getElementById('togglePass');
+
+togglePassBtn.addEventListener('click', () => {
+  const type = passwordEl.type==='password'?'text':'password';
+  passwordEl.type = type;
+  togglePassBtn.textContent = type==='password'?'👁️':'🙈';
+});
+
+passwordEl.addEventListener('input', () => {
+  const role = userRoleEl.value;
+  if(passwordEl.value.trim() && (role==='admin' || role==='superadmin')){
+    getCodeGroup.style.display='block';
+  } else {
+    getCodeGroup.style.display='none';
+    authGroup.style.display='none';
+  }
+});
+
+getCodeBtn.addEventListener('click', () => {
+  authGroup.style.display='block';
+  authCodeEl.value='';
+  authCodeEl.type='password';
+  alert('Demo: Enter your 16-character Authenticator code.');
+});
+
+function setError(msg){ errorMessage.textContent = msg; }
+function clearError(){ errorMessage.textContent=''; }
+function validateAuthenticator(code){ return /^[A-Za-z0-9]{16}$/.test(code); }
+
+loginBtn.addEventListener('click', () => {
+  clearError();
+  const role = userRoleEl.value.trim();
+  const username = usernameEl.value.trim();
+  const password = passwordEl.value.trim();
+  const authCode = authCodeEl.value.trim();
+
+  if(!role) return setError('Please select role.');
+  if(!username || !password) return setError('Enter username & password.');
+
+  const demo = DEMO[role];
+  if(!demo || demo.username!==username || demo.password!==password) return setError('Invalid credentials.');
+
+  if(role==='admin' || role==='superadmin'){
+    if(authGroup.style.display==='none') return setError('Please get Authenticator code.');
+    if(!validateAuthenticator(authCode)) return setError('Authenticator code must be 16 characters.');
+    if(authCode!==demo.authCode) return setError('Invalid authenticator code.');
+    if(role==='admin') window.location.href = 'admin_dashboard.html';
+    else window.location.href = 'superadmin_dashboard.html';
+  } else if(role==='teacher'){
+    window.location.href = 'teacher_dashboard.html';
+  } else if(role==='student'){
+    window.location.href = 'student_dashboard.html';
+  }
+});
+</script>
+
+</body>
+</html>

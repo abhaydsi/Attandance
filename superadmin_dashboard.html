@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Super Admin Dashboard</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f3f6fb;padding:20px;}
+.container{max-width:1200px;margin:auto;background:white;padding:20px;border-radius:10px;box-shadow:0 5px 20px rgba(0,0,0,0.1);}
+h2,h3{color:#0369a1;}
+input,button,select{padding:5px;margin:5px;}
+table{border-collapse:collapse;width:100%;margin-top:15px;}
+th,td{border:1px solid #ccc;padding:8px;text-align:center;}
+th{background:#0369a1;color:white;}
+button.action-btn{padding:3px 6px;margin:0 2px;cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="container">
+<h2>Super Admin Dashboard (Demo)</h2>
+
+<h3>Add / Edit Schools</h3>
+<input type="text" id="schoolName" placeholder="School Name">
+<button onclick="addSchool()">Add School</button>
+
+<h3>All Schools</h3>
+<table id="schoolTable">
+  <thead>
+    <tr><th>ID</th><th>School Name</th><th>Classes</th><th>Actions</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<h3>View School Attendance</h3>
+<select id="schoolSelect" onchange="renderSchoolAttendance()">
+  <option value="">Select School</option>
+</select>
+
+<table id="attendanceTable">
+  <thead>
+    <tr><th>Student</th><th>Class</th><th>Date</th><th>Type</th><th>Status</th></tr>
+  </thead>
+  <tbody></tbody>
+</table>
+</div>
+
+<script>
+// Demo data
+let schools = [
+  {id:1, name:'Rural School A', classList:['Class A','Class B']},
+  {id:2, name:'Rural School B', classList:['Class A', 'Class B']}
+];
+
+let students = [
+  {name:'STU001', schoolId:1, class:'Class A'},
+  {name:'STU002', schoolId:1, class:'Class B'},
+  {name:'STU003', schoolId:2, class:'Class A'}
+];
+
+let attendance = [
+  {student:'STU001', schoolId:1, class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'},
+  {student:'STU001', schoolId:1, class:'Class A', date:'2025-09-22', type:'Midday', status:'Absent'},
+  {student:'STU003', schoolId:2, class:'Class A', date:'2025-09-22', type:'Morning', status:'Present'}
+];
+
+// Render school table
+function renderSchools(){
+  const tbody = document.querySelector('#schoolTable tbody');
+  tbody.innerHTML='';
+  const select = document.getElementById('schoolSelect');
+  select.innerHTML='<option value="">Select School</option>';
+  schools.forEach(s=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${s.id}</td><td><input value="${s.name}" onchange="editSchool(${s.id}, this.value)"></td><td>${s.classList.join(', ')}</td><td><button class="action-btn" onclick="deleteSchool(${s.id})">Delete</button></td>`;
+    tbody.appendChild(tr);
+    select.innerHTML+=`<option value="${s.id}">${s.name}</option>`;
+  });
+}
+
+// Add school
+function addSchool(){
+  const name = document.getElementById('schoolName').value.trim();
+  if(!name){alert('Enter school name'); return;}
+  const id = schools.length?schools[schools.length-1].id+1:1;
+  schools.push({id, name, classList:[]});
+  document.getElementById('schoolName').value='';
+  renderSchools();
+}
+
+// Edit school
+function editSchool(id,newName){
+  const school = schools.find(s=>s.id===id);
+  if(school) school.name=newName;
+  renderSchools();
+}
+
+// Delete school
+function deleteSchool(id){
+  if(confirm('Are you sure to delete this school?')){
+    schools = schools.filter(s=>s.id!==id);
+    students = students.filter(st=>st.schoolId!==id);
+    attendance = attendance.filter(a=>a.schoolId!==id);
+    renderSchools();
+    renderSchoolAttendance();
+  }
+}
+
+// Render attendance for selected school
+function renderSchoolAttendance(){
+  const schoolId = parseInt(document.getElementById('schoolSelect').value);
+  const tbody = document.querySelector('#attendanceTable tbody');
+  tbody.innerHTML='';
+  if(!schoolId) return;
+
+  const schoolAttendance = attendance.filter(a=>a.schoolId===schoolId);
+  schoolAttendance.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${a.student}</td><td>${a.class}</td><td>${a.date}</td><td>${a.type}</td><td>${a.status}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+renderSchools();
+</script>
+</body>
+</html>
